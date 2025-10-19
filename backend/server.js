@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import db from "./models/index.js";
 
 // Create express app
 const app = express();
@@ -21,12 +22,25 @@ import db from "./models/index.js";    // 👈 ESM requires .js extension
 const Role = db.role;
 
 // Synchronize models
-db.sequelize.sync();
+
+// db.sequelize.sync();
+
 // To force reset DB:
 // db.sequelize.sync({ force: true }).then(() => {
 //   console.log('Drop and Resync Database with { force: true }');
 //   initial();
 // });
+
+db.sequelize.sync({ force: true }).then(() => {
+  console.log("Drop and re-sync db.");
+  initial(); //initialize seeding
+});
+
+function initial() {
+  Role.create({ id: 1, name: "admin" });
+  Role.create({ id: 2, name: "moderator" });
+  Role.create({ id: 3, name: "user" });
+}
 
 // Simple route
 app.get("/", (req, res) => {

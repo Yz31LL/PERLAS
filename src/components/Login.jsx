@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function Login() {
@@ -6,6 +7,8 @@ export default function Login() {
     username: "",
     password: ""
   });
+  
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,14 +19,27 @@ export default function Login() {
     try {
       const res = await axios.post("http://localhost:8080/api/auth/signin", formData);
       console.log(res.data);
+      console.log("Backend roles:", res.data.roles);
       localStorage.setItem("user", JSON.stringify(res.data));
       alert("Login successful!");
+
+      const roles = res.data.roles; // should be an array like ["ROLE_ADMIN"]
+      if (roles.includes("ROLE_ADMIN")) {
+        navigate("/admin");
+      }
+      else if (roles.includes("ROLE_MODERATOR")) {
+      navigate("/moderator");
+      } 
+      else {
+      navigate("/user");
+      }
+
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Login failed");
     }
   };
-
+  
   return (
     <form onSubmit={handleSubmit}>
       <h2>Log In</h2>
