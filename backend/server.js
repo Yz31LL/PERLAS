@@ -6,7 +6,7 @@ import db from "./models/index.js";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:5173"
+  origin: ["http://localhost:5173", "http://localhost:5174"]
 };
 
 app.use(cors(corsOptions));
@@ -35,11 +35,20 @@ db.sequelize.sync().then(() => {
   initial(); //initialize seeding
 });
 
-function initial() {
-  Role.create({ id: 1, name: "admin" });
-  Role.create({ id: 2, name: "moderator" });
-  Role.create({ id: 3, name: "user" });
-}
+async function initial() {
+  const roles = [
+    { id: 1, name: "admin" },
+    { id: 2, name: "moderator" },
+    { id: 3, name: "user" },
+  ];
+
+  for (const role of roles) {
+    await Role.findOrCreate({
+      where: { name: role.name },
+      defaults: role,
+    });
+  }
+};
 
 // Simple route
 app.get("/", (req, res) => {
