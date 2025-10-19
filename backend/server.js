@@ -18,7 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Database
-import db from "./models/index.js";    // 👈 ESM requires .js extension
 const Role = db.role;
 
 // Synchronize models
@@ -31,7 +30,7 @@ const Role = db.role;
 //   initial();
 // });
 
-db.sequelize.sync({ force: true }).then(() => {
+db.sequelize.sync().then(() => {
   console.log("Drop and re-sync db.");
   initial(); //initialize seeding
 });
@@ -60,10 +59,3 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}.`);
 });
-
-// Initialize roles if needed
-function initial() {
-  Role.create({ id: 1, name: "user" });
-  Role.create({ id: 2, name: "moderator" });
-  Role.create({ id: 3, name: "admin" });
-}

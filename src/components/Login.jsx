@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import AuthService from "../services/auth.services";
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: ""
-  });
-  
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,29 +13,21 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/signin", formData);
-      console.log(res.data);
-      console.log("Backend roles:", res.data.roles);
-      localStorage.setItem("user", JSON.stringify(res.data));
+      const res = await AuthService.login(formData.username, formData.password);
       alert("Login successful!");
+      console.log("Backend roles:", res.roles);
 
-      const roles = res.data.roles; // should be an array like ["ROLE_ADMIN"]
-      if (roles.includes("ROLE_ADMIN")) {
-        navigate("/admin");
-      }
-      else if (roles.includes("ROLE_MODERATOR")) {
-      navigate("/moderator");
-      } 
-      else {
-      navigate("/user");
-      }
+      const roles = res.roles || [];
+      if (roles.includes("ROLE_ADMIN")) navigate("/admin");
+      else if (roles.includes("ROLE_MODERATOR")) navigate("/moderator");
+      else navigate("/user");
 
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Login failed");
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit}>
       <h2>Log In</h2>
@@ -47,6 +35,7 @@ export default function Login() {
         type="text"
         name="username"
         placeholder="Username"
+        value={formData.username}
         onChange={handleChange}
         required
       />
@@ -54,6 +43,7 @@ export default function Login() {
         type="password"
         name="password"
         placeholder="Password"
+        value={formData.password}
         onChange={handleChange}
         required
       />
